@@ -1,7 +1,7 @@
-import { ElMessage } from 'element-plus';
+import { ElMessage } from 'element-plus'
 
-type MessageType = 'success' | 'warning' | 'error';
-type MessageCallback = () => void;
+type MessageType = 'success' | 'warning' | 'error'
+type MessageCallback = () => void
 
 /**
  * Show a global message with optional callback
@@ -9,7 +9,7 @@ type MessageCallback = () => void;
 const showMessage = (
   message: string,
   callback?: MessageCallback,
-  type: MessageType = 'success'
+  type: MessageType = 'success',
 ): void => {
   ElMessage({
     type,
@@ -17,25 +17,25 @@ const showMessage = (
     duration: 2000,
     onClose: () => {
       if (callback) {
-        callback();
+        callback()
       }
-    }
-  });
-};
+    },
+  })
+}
 
 /**
  * Exported message utility with typed methods
  */
 const message = {
   error: (msg: string, callback?: MessageCallback) => {
-    showMessage(msg, callback, 'error');
+    showMessage(msg, callback, 'error')
   },
   success: (msg: string, callback?: MessageCallback) => {
-    showMessage(msg, callback, 'success');
+    showMessage(msg, callback, 'success')
   },
   warning: (msg: string, callback?: MessageCallback) => {
-    showMessage(msg, callback, 'warning');
-  }
-};
+    showMessage(msg, callback, 'warning')
+  },
+}
 
-export default message;
+export default message

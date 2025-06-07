@@ -5,7 +5,7 @@
       <div class="login-card-right">
         <h2 class="login-head-title">Sign In</h2>
         <h3 class="login-head-description">Hello.</h3>
-        <h3 class="login-head-sub-description">{{greeting}}</h3>
+        <h3 class="login-head-sub-description">{{ greeting }}</h3>
         <el-form
           :label-position="'top'"
           label-width="100px"
@@ -45,7 +45,9 @@
           <el-form-item>
             <el-button type="primary" @click="handleLogin()"> Login </el-button>
           </el-form-item>
-          <a class="login-forgot-password" @click="router.push('/forgot-password')">Forgot password?</a>
+          <a class="login-forgot-password" @click="router.push('/forgot-password')"
+          >Forgot password?</a
+          >
         </el-form>
       </div>
     </div>
@@ -55,38 +57,43 @@
 <script lang="ts" setup>
 import { User, Lock, Ticket } from '@element-plus/icons-vue'
 import { reactive, ref, onMounted, onUnmounted, computed } from 'vue'
+import type { FormInstance, FormRules } from 'element-plus'
 import message from '@/utils/message.ts'
 import request from '@/utils/request.ts'
 import router from '@/router'
 
-let formDataRef = ref(null);
-const captcha = ref(null);
-let captchaTimer: any = null;
+interface CaptchaResponse {
+  img: string
+  uuid: string
+  expiresIn: number
+}
 
-const rules = {
-  username: [{ required: true, message: "Please enter username.", trigger: "blur" }],
-  password: [{ required: true, message: "Please enter password.", trigger: "blur" }],
-  verifyCode: [{ required: true, message: "Please enter verification code.", trigger: "blur" }],
+const formDataRef = ref<FormInstance | null>(null)
+const captcha = ref<CaptchaResponse | null>(null)
+let captchaTimer: ReturnType<typeof setTimeout> | null = null
+
+const rules: FormRules = {
+  username: [{ required: true, message: 'Please enter username.', trigger: 'blur' }],
+  password: [{ required: true, message: 'Please enter password.', trigger: 'blur' }],
+  verifyCode: [{ required: true, message: 'Please enter verification code.', trigger: 'blur' }],
 }
 
 const loginForm = reactive({
-  username: "",
-  password: "",
-  verifyCode: "",
+  username: '',
+  password: '',
+  verifyCode: '',
   captchaUUID: '',
-});
+})
 
 async function getCaptcha() {
   try {
     const res = await request.get('/auth/captcha')
     captcha.value = res.data
+    loginForm.captchaUUID = res.data.uuid
 
-    loginForm.captchaUUID = res.data.uuid;
+    loginForm.verifyCode = ""
 
-    // Clear any previous timer
     if (captchaTimer) clearTimeout(captchaTimer)
-
-    // Auto-refresh when it's about to expire (e.g. 5 seconds before)
     const refreshIn = (res.data.expiresIn - 10) * 1000
     captchaTimer = setTimeout(getCaptcha, refreshIn)
   } catch (err) {
@@ -95,6 +102,8 @@ async function getCaptcha() {
 }
 
 async function handleLogin() {
+  if (!formDataRef.value) return
+
   formDataRef.value.validate(async (valid: boolean) => {
     if (valid) {
       try {
@@ -102,23 +111,22 @@ async function handleLogin() {
           username: loginForm.username,
           password: loginForm.password,
           verifyCode: loginForm.verifyCode,
-          captchaUUID: loginForm.captchaUUID
-        });
+          captchaUUID: loginForm.captchaUUID,
+        })
 
         if (res.code === 200) {
-          message.success(res.message || 'Login successful');
-        } else {
-          message.error(res.message || 'Login failed. Please try again.');
-          await getCaptcha();
+          message.success(res.message || 'Login successful')
+          await router.push('/dashboard').catch(err => console.log(err))
         }
-      } catch (err) {
-        message.error('Login failed. Please try again.');
+      } catch (err: any) {
+        if (err.code !== 400) {
+          await getCaptcha()
+        }
       }
     } else {
-      message.error("Login failed. Please fill in all the blank.");
-      return false;
+      message.error('Login failed. Please fill in all the blank.')
     }
-  });
+  })
 }
 
 const greeting = computed(() => {

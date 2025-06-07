@@ -9,6 +9,6 @@ import { RouterView } from 'vue-router'
 import { ElConfigProvider } from 'element-plus'
 </script>
 
-<style scoped>
+<style lang="ts" scoped>
 
 </style>

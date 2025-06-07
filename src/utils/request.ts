@@ -1,80 +1,126 @@
-import axios from "axios";
-import type { AxiosRequestConfig, AxiosResponse } from "axios";
-import message from "@/utils/message";
-import router from "@/router";
+import axios, {
+  type AxiosInstance,
+  type AxiosResponse,
+  type AxiosRequestConfig,
+  type InternalAxiosRequestConfig,
+} from 'axios'
+import message from '@/utils/message'
 
-interface ApiResponse<T = any> {
-  code: number | string;
-  message: string;
-  data: T;
+export interface Result<T = any> {
+  code: number
+  message: string
+  data: T
 }
 
-const request = axios.create({
+const config = {
   baseURL: 'http://localhost:9090',
   timeout: 5000,
-});
+}
 
-// Request Interceptor
-request.interceptors.request.use((config: AxiosRequestConfig) => {
-  // Set Content-Type
-  if (config.data instanceof FormData) {
-    delete config.headers?.['Content-Type'];
-  } else {
-    config.headers = {
-      ...config.headers,
-      'Content-Type': 'application/json;charset=UTF-8',
-    };
+class Http {
+  private instance: AxiosInstance
+  constructor(config: AxiosRequestConfig) {
+    this.instance = axios.create(config)
+    this.interceptors()
   }
-
-  // Set Bearer Token
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers = {
-      ...config.headers,
-      'Authorization': `Bearer ${JSON.parse(token)}`,
-    };
-  }
-
-  return config;
-}, error => {
-  return Promise.reject(error);
-});
-
-// Response Interceptor
-request.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => {
-    let res = response.data;
-
-    if (response.config.responseType === "blob") {
-      return res;
-    }
-
-    if (typeof res === "string") {
-      res = res ? JSON.parse(res) : {};
-    }
-
-    return res; // always resolve to allow custom logic in try block
-  },
-  (error) => {
-    if (error.response && error.response.data) {
-      const res = error.response.data;
-
-      // Handle auth-related errors
-      if (res.code === 401 || res.code === 400 || res.code === 405) {
-        message.error(res.message);
-        localStorage.removeItem("token");
-        router.push("/login");
-      } else {
-        message.error(res.message || "Request failed.");
+  private interceptors() {
+    this.instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+      let token = ''
+      if (token) {
+        config.headers!['token'] = token
       }
+      return config
+    }),
+      (error: any) => {
+        error.data = {}
+        error.data.msg = 'Server error, please contact administrator'
+        return error
+      }
+    this.instance.interceptors.response.use(
+      (res: AxiosResponse) => {
+        if (res.data.code === 200) {
+          return res.data
+        } else {
+          message.error(res.data.message || 'API error')
+          return Promise.reject(res.data)
+        }
+      },
+      (error: any) => {
+        console.log('Entered error handler')
+        error.data = {}
 
-      // Resolve with error response to allow custom handling
-      return Promise.resolve(res);
-    } else {
-      message.error("Network error. Please check your connection.");
-      return Promise.reject(error); // actual network or timeout error
-    }
+        if (error && error.response) {
+          switch (error.response.status) {
+            case 400:
+              error.data.msg = 'Bad Request'
+              break
+            case 401:
+              error.data.msg = 'Unauthorized, please log in again'
+              break
+            case 403:
+              error.data.msg = 'Forbidden'
+              break
+            case 404:
+              error.data.msg = 'Not Found, API endpoint not available'
+              break
+            case 405:
+              error.data.msg = 'Method Not Allowed'
+              break
+            case 408:
+              error.data.msg = 'Request Timeout'
+              break
+            case 500:
+              error.data.msg = 'Internal Server Error'
+              break
+            case 501:
+              error.data.msg = 'Not Implemented'
+              break
+            case 502:
+              error.data.msg = 'Bad Gateway'
+              break
+            case 503:
+              error.data.msg = 'Service Unavailable'
+              break
+            case 504:
+              error.data.msg = 'Gateway Timeout'
+              break
+            case 505:
+              error.data.msg = 'HTTP Version Not Supported'
+              break
+            default:
+              error.data.msg = `Unexpected status code: ${error.response.status}`
+          }
+          message.error(error.data.msg)
+        } else {
+          error.data.msg = 'Failed to connect to server'
+          message.error(error.data.msg)
+        }
+
+        return Promise.reject(error)
+      }
+    )
   }
-);
 
-export default request;
+  // REST API
+  post<T=Result>(url: string, data?: object): Promise<T> {
+    return this.instance.post(url, data);
+  }
+  get<T=Result>(url: string, params?: object): Promise<T> {
+    return this.instance.get(url, params);
+  }
+  put<T=Result>(url: string, data?: object): Promise<T> {
+    return this.instance.put(url, data);
+  }
+  delete<T=Result>(url: string): Promise<T> {
+    return this.instance.delete(url);
+  }
+  upload<T=Result>(url: string, params?: object): Promise<T> {
+    return this.instance.post(url, params, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
+}
+
+export default new Http(config);

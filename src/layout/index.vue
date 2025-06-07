@@ -1,0 +1,62 @@
+<template>
+  <el-container class="layout">
+    <el-aside class="sidebar">
+      <MenuBar />
+    </el-aside>
+    <el-container>
+      <el-header class="header">
+        <Header />
+      </el-header>
+      <el-main class="main">
+        <div class="tabs">
+          <Tabs class="tab" />
+          <CloseTabs />
+        </div>
+        <router-view />
+      </el-main>
+    </el-container>
+  </el-container>
+</template>
+
+<script lang="ts" setup>
+import Header from '@/layout/header/header.vue'
+import MenuBar from '@/layout/menu/MenuBar.vue'
+import Tabs from '@/layout/tabs/Tabs.vue'
+import CloseTabs from '@/layout/tabs/CloseTabs.vue'
+</script>
+
+<style lang="scss" scoped>
+.layout {
+  height: 100vh;
+
+  .sidebar {
+    width: auto;
+    background-color: #fff;
+    border-right: solid 1px rgba(0, 0, 0, 0.1);
+  }
+
+  .header {
+    background-color: #fff;
+    align-items: center;
+    display: flex;
+  }
+  .main {
+    background-image: url('@/assets/image/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    padding: 0;
+
+    .tabs {
+      .tab {
+        padding-left: 10px;
+        padding-right: 80px;
+      }
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--el-border-color-light);
+    }
+  }
+}
+</style>

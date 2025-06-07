@@ -15,7 +15,8 @@
     "@element-plus/icons-vue": "^2.3.1",
     "axios": "^1.9.0",
     "element-plus": "^2.9.11",
-    "pinia": "^3.0.2",
+    "pinia": "^3.0.3",
+    "pinia-plugin-persistedstate": "^4.3.0",
     "sass": "^1.89.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1"
