@@ -45,5 +45,36 @@ function handleConfirm() {
 </script>
 
 <style lang="scss" scoped>
+.el-dialog {
+  border-top-left-radius: 7px !important;
+  border-top-right-radius: 7px !important;
 
+  .el-dialog__header {
+    margin-right: 0px;
+    border-top-left-radius: 7px !important;
+    border-top-right-radius: 7px !important;
+    background-color: #009688 !important;
+
+    .el-dialog__title {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+    }
+  }
+
+  .el-dialog__headerbtn {
+    .el-dialog__close {
+      color: #fff;
+    }
+  }
+
+  .el-dialog__body {
+    padding: 10px;
+  }
+
+  .el-dialog__footer {
+    border-top: 1px solid #e8eaec !important;
+    padding: 10px;
+  }
+}
 </style>

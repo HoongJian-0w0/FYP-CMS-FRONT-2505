@@ -33,7 +33,7 @@ const defaultActive = computed(() => {
 let menuList = reactive([
   {
     path: '/dashboard',
-    component: 'Layout',
+    component: '/views/cms/user/dashboard/dashboard',
     name: 'Dashboard',
     meta: {
       title: 'Dashboard',
@@ -52,7 +52,7 @@ let menuList = reactive([
     },
     children: [
       {
-        path: '/userList',
+        path: '/cms/userList',
         component: '/views/cms/user/userList',
         name: 'userList',
         meta: {
@@ -62,7 +62,7 @@ let menuList = reactive([
         },
       },
       {
-        path: '/roleList',
+        path: '/cms/roleList',
         component: '/views/cms/role/roleList',
         name: 'roleList',
         meta: {
@@ -72,7 +72,7 @@ let menuList = reactive([
         },
       },
       {
-        path: '/menuList',
+        path: '/cms/menuList',
         component: '/views/cms/menu/menuList',
         name: 'menuList',
         meta: {
@@ -100,6 +100,7 @@ let menuList = reactive([
 
 :deep(.el-menu) {
   border-right: none !important;
+  transition: width 0.8s ease !important;
 }
 
 :deep(.el-sub-menu .el-sub-menu__title) {

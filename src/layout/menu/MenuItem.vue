@@ -1,18 +1,21 @@
 <template>
   <template v-for="menu in menuList" :key="menu.path">
-    <!-- If the menu has children (sub-menu) -->
     <el-sub-menu v-if="menu.children && menu.children.length > 0" :index="menu.path">
       <template #title>
-        <el-icon>
-          <component :is="menu.meta.icon" />
-        </el-icon>
-        <span class="menu-title">{{ menu.meta.title }}</span>
+        <div
+          class="submenu-title"
+          :class="{ active: isActive(menu.path) }"
+          @click.stop="handleClick(menu)"
+        >
+          <el-icon>
+            <component :is="menu.meta.icon" />
+          </el-icon>
+          <span class="menu-title" v-if="!isCollapse">{{ menu.meta.title }}</span>
+        </div>
       </template>
-      <!-- Recursive rendering of sub-menu -->
       <menu-item :menuList="menu.children" />
     </el-sub-menu>
 
-    <!-- If the menu has no children (regular menu item) -->
     <el-menu-item v-else :index="menu.path">
       <el-icon>
         <component :is="menu.meta.icon" />
@@ -23,7 +26,40 @@
 </template>
 
 <script lang="ts" setup>
+import { useRouter, useRoute } from 'vue-router'
+import { computed } from 'vue'
+import { useMenuStore } from '@/store/menu'
+
 defineProps(['menuList'])
+
+const router = useRouter()
+const route = useRoute()
+const menuStore = useMenuStore()
+
+const isCollapse = computed(() => menuStore.getCollapse)
+
+function handleClick(menu: any) {
+  if (menu.path) {
+    router.push(menu.path)
+  }
+}
+
+function isActive(path: string): boolean {
+  return route.path === path
+}
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped>
+.submenu-title {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  cursor: pointer;
+}
+.submenu-title.active {
+  color: var(--el-color-primary) !important;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+</style>

@@ -16,12 +16,18 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/dashboard',
     component: () => import('@/layout/index.vue'),
-    name: 'Dashboard',
-    meta: {
-      title: 'Dashboard',
-      icon: 'HomeFilled',
-      roles: ['cms:dashboard'],
-    },
+    children: [
+      {
+        path: '',
+        name: 'DashboardHome',
+        component: () => import('@/views/cms/dashboard/dashboard.vue'),
+        meta: {
+          title: 'Dashboard',
+          icon: 'HomeFilled',
+          roles: ['cms:dashboard'],
+        },
+      },
+    ],
   },
   {
     path: '/cms',
@@ -34,7 +40,7 @@ const routes: Array<RouteRecordRaw> = [
     },
     children: [
       {
-        path: '/userList',
+        path: 'userList',
         name: 'userList',
         component: () => import('@/views/cms/user/userList.vue'),
         meta: {
@@ -44,7 +50,7 @@ const routes: Array<RouteRecordRaw> = [
         },
       },
       {
-        path: '/roleList',
+        path: 'roleList',
         name: 'roleList',
         component: () => import('@/views/cms/role/roleList.vue'),
         meta: {
@@ -54,7 +60,7 @@ const routes: Array<RouteRecordRaw> = [
         },
       },
       {
-        path: '/menuList',
+        path: 'menuList',
         name: 'menuList',
         component: () => import('@/views/cms/menu/menuList.vue'),
         meta: {
