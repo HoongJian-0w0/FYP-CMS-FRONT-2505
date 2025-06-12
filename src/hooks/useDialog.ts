@@ -14,10 +14,6 @@ export default function useDialog() {
     dialog.visible = false
   }
 
-  function handleConfirm() {
-    dialog.visible = false
-  }
-
   function handleShow() {
     dialog.visible = true
   }
@@ -25,7 +21,6 @@ export default function useDialog() {
   return {
     dialog,
     handleClose,
-    handleConfirm,
     handleShow
   }
 

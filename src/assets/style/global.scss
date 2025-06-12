@@ -91,3 +91,36 @@ p {
   background: var(--color-primary);
   color: var(--color-white);
 }
+
+.blue-gradient-btn {
+  background: linear-gradient(90deg, #00c6ff, #0072ff) !important;
+}
+
+.el-pagination {
+  margin-top: 15px;
+}
+
+.custom-confirm-btn {
+  background-color: #F56C6C !important; // your desired confirm color
+  color: white !important;
+  border: none;
+}
+
+.role-tag {
+  min-width: 60px;
+}
+
+.tag {
+  min-width: 70px;
+}
+
+/*
+.admin-role {
+  background: linear-gradient(90deg, #ff5858, #f857a6) !important;
+  color: white !important;
+}
+
+.user-role {
+  background: linear-gradient(90deg, #00c6ff, #0072ff) !important;
+  color: white !important;
+}*/

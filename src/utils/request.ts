@@ -2,11 +2,12 @@ import axios, {
   type AxiosInstance,
   type AxiosResponse,
   type AxiosRequestConfig,
-  type InternalAxiosRequestConfig,
 } from 'axios'
 import message from '@/utils/message'
+import router from '@/router'
 
 export interface Result<T = any> {
+  success: boolean,
   code: number
   message: string
   data: T
@@ -24,10 +25,10 @@ class Http {
     this.interceptors()
   }
   private interceptors() {
-    this.instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-      let token = ''
+    this.instance.interceptors.request.use((config) => {
+      const token = localStorage.getItem('token')
       if (token) {
-        config.headers!['token'] = token
+        config.headers['Authorization'] = `Bearer ${token}`
       }
       return config
     }),
@@ -41,7 +42,12 @@ class Http {
         if (res.data.code === 200) {
           return res.data
         } else {
-          message.error(res.data.message || 'API error')
+          if (res.data.code === 401) {
+            router.push({ path: '/login' })
+            message.error(res.data.message || 'Unauthorized, please log in again')
+          } else {
+            message.error(res.data.message || 'API error')
+          }
           return Promise.reject(res.data)
         }
       },
@@ -92,6 +98,7 @@ class Http {
           }
           message.error(error.data.msg)
         } else {
+          console.log(error)
           error.data.msg = 'Failed to connect to server'
           message.error(error.data.msg)
         }

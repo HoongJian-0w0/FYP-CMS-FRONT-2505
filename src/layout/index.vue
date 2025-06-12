@@ -40,13 +40,18 @@ import CloseTabs from '@/layout/tabs/CloseTabs.vue'
     align-items: center;
     display: flex;
   }
+
+  .el-main {
+    padding: 12px !important;
+  }
+
   .main {
     background-image: url('@/assets/image/background.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 
-    padding: 0;
+    padding: 0 !important;
 
     .tabs {
       .tab {

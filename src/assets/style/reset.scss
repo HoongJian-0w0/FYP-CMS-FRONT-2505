@@ -92,3 +92,7 @@ textarea:not([rows]) {
 :target {
   scroll-margin-block: 5ex;
 }
+
+.el-form--inline .el-form-item {
+  margin-right: 12px !important;
+}

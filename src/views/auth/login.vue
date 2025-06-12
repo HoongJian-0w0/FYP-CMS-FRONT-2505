@@ -10,9 +10,10 @@
           :label-position="'top'"
           label-width="100px"
           :model="loginForm"
-          :rules="rules"
+          :rules="formRules"
           ref="formDataRef"
           @submit.prevent
+          @keydown.enter.prevent="handleLogin"
         >
           <div class="login-label-container">
             <el-icon class="login-label-icon"><User /></el-icon>
@@ -26,7 +27,7 @@
             <h4 class="login-label">Password</h4>
           </div>
           <el-form-item prop="password">
-            <el-input v-model="loginForm.password" placeholder="Please enter your password." />
+            <el-input v-model="loginForm.password" placeholder="Please enter your password." type="password" show-password />
           </el-form-item>
           <el-form-item prop="verifyCode">
             <div class="check-code-panel">
@@ -43,7 +44,7 @@
             </div>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleLogin()"> Login </el-button>
+            <el-button type="primary" @click="handleLogin"> Login </el-button>
           </el-form-item>
           <a class="login-forgot-password" @click="router.push('/forgot-password')"
           >Forgot password?</a
@@ -57,10 +58,11 @@
 <script lang="ts" setup>
 import { User, Lock, Ticket } from '@element-plus/icons-vue'
 import { reactive, ref, onMounted, onUnmounted, computed } from 'vue'
-import type { FormInstance, FormRules } from 'element-plus'
+import { login, fetchCaptcha, formRules } from '@/api/auth/index.ts'
+import type { FormInstance } from 'element-plus'
 import message from '@/utils/message.ts'
-import request from '@/utils/request.ts'
 import router from '@/router'
+import type { loginModel } from '@/api/auth/AuthModel.ts'
 
 interface CaptchaResponse {
   img: string
@@ -72,13 +74,7 @@ const formDataRef = ref<FormInstance | null>(null)
 const captcha = ref<CaptchaResponse | null>(null)
 let captchaTimer: ReturnType<typeof setTimeout> | null = null
 
-const rules: FormRules = {
-  username: [{ required: true, message: 'Please enter username.', trigger: 'blur' }],
-  password: [{ required: true, message: 'Please enter password.', trigger: 'blur' }],
-  verifyCode: [{ required: true, message: 'Please enter verification code.', trigger: 'blur' }],
-}
-
-const loginForm = reactive({
+const loginForm = reactive<loginModel>({
   username: '',
   password: '',
   verifyCode: '',
@@ -87,7 +83,7 @@ const loginForm = reactive({
 
 async function getCaptcha() {
   try {
-    const res = await request.get('/auth/captcha')
+    const res = await fetchCaptcha()
     captcha.value = res.data
     loginForm.captchaUUID = res.data.uuid
 
@@ -107,15 +103,11 @@ async function handleLogin() {
   formDataRef.value.validate(async (valid: boolean) => {
     if (valid) {
       try {
-        const res = await request.post('/auth/login', {
-          username: loginForm.username,
-          password: loginForm.password,
-          verifyCode: loginForm.verifyCode,
-          captchaUUID: loginForm.captchaUUID,
-        })
+        const res = await login(loginForm)
 
-        if (res.code === 200) {
-          message.success(res.message || 'Login successful')
+        if (res.success) {
+          message.success(res.message + ", Welcome, " + res.data.user.username || 'Login successful')
+          localStorage.setItem('token', res.data.user.token)
           await router.push('/dashboard').catch(err => console.log(err))
         }
       } catch (err: any) {
